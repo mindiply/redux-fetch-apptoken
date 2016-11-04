@@ -5,7 +5,10 @@
 'use strict'
 
 import fetchWithAppTokenMiddleware from './middleware'
+import {retrieveFetchAppToken, fetchWithAppToken} from './actions'
 
 export {
-    fetchWithAppTokenMiddleware
+    fetchWithAppTokenMiddleware,
+    retrieveFetchAppToken,
+    fetchWithAppToken
 }
