@@ -10,7 +10,8 @@ import {RETRIEVE_FETCH_APP_TOKEN, FETCH_WITH_APP_TOKEN} from './consts'
  * in fetch requests.
  *
  *
- * @param scopes
+ * @param scopes array of scopes to retrieve the token for
+ * @param cb callback called with the token data after succesfully retrieving it
  * @returns {{type, scopes: *}}
  */
 export function retrieveFetchAppToken (scopes, cb) {

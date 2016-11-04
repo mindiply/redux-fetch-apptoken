@@ -42,7 +42,7 @@ const fetchWithAppTokenMiddleware = (options = {}) => {
 
     let currentTokenPerScope = {}
 
-    function _hasScopeValidToken(scope) {
+    function _hasScopeValidToken (scope) {
         if (!(scope in currentTokenPerScope)) return false
         let now = moment().utc()
         if (!currentTokenPerScope[scope].expires || currentTokenPerScope[scope].expires.isBefore(now)) return false
@@ -76,6 +76,7 @@ const fetchWithAppTokenMiddleware = (options = {}) => {
             })
             .catch(err => {
                 // Do nothing?
+                console.log(err)
             })
     }
 
