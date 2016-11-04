@@ -63,16 +63,20 @@ const fetchWithAppTokenMiddleware = (options = {}) => {
 
                 scopes.forEach(scope => {
                     currentTokenPerScope[scope] = {token: tokenData.token, expires: expireDate, queue: (scope in currentTokenPerScope && currentTokenPerScope[scope].queue ? currentTokenPerScope[scope].queue : [])}
-                    if (scope in currentTokenPerScope && currentTokenPerScope[scope].queue && currentTokenPerScope[scope].queue.length > 0) {
-                        currentTokenPerScope[scope].queue.forEach(queuedRequest => {
-                            dispatch(queuedRequest)
-                        })
-                    }
                 })
                 if (typeof cb === 'function') cb(tokenData)
                 setInterval(() => {
                     dispatch(retrieveFetchAppToken(scopes))
                 }, Math.max(60000, (expiresInSeconds - 60) * 1000))
+                scopes.forEach(scope => {
+                    if (scope in currentTokenPerScope && currentTokenPerScope[scope].queue && currentTokenPerScope[scope].queue.length > 0) {
+                        let requestQueue = currentTokenPerScope[scope].queue.slice()
+                        currentTokenPerScope[scope].queue = []
+                        requestQueue.forEach(queuedRequest => {
+                            dispatch(queuedRequest)
+                        })
+                    }
+                })
             })
             .catch(err => {
                 // Do nothing?
