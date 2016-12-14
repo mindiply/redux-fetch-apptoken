@@ -1,11 +1,13 @@
 {
   "name": "@bongione/redux-fetch-apptoken",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Redux middleware that wraps ES6 fetch calls with an app token header",
   "main": "lib/index.js",
+  "files": ["lib"],
   "scripts": {
     "clean": "rimraf lib",
     "build": "babel src --out-dir lib",
+    "build_watch": "babel src -w --out-dir lib",
     "lint": "eslint src",
     "test": "mocha --compilers js:babel-register --recursive",
     "prepublish": "npm run clean && npm run build && npm run lint && npm run test"

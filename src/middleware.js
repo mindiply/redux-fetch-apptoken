@@ -22,6 +22,7 @@ function _defaultAppTokenRequest (url = '/auth/users/app_token', scopes = ['web'
             },
             body: JSON.stringify(data)
         })
+        .then(response => response.json())
 }
 
 /**
@@ -54,17 +55,18 @@ const fetchWithAppTokenMiddleware = (options = {}) => {
         let {scopes, cb} = action
         if (!scopes || !scopes.length || scopes.length === 0) throw new Error('The action scopes attribute should be an array with at least one element')
         tokenFetchRequest(tokenFetchUrl, scopes)
-            .then(tokenData => {
+            .then(result => {
+                if (!result || result.result !== 'ok') throw new Error('Invalid token response from server')
+                let tokenData = result.token_data
                 if (!tokenData || typeof tokenData.expires_in_s !== 'number' || typeof tokenData.token !== 'string') throw new Error('Invalid token data returned')
                 let expiresInSeconds = moment(tokenData.expires_in_s)
                 if (expiresInSeconds < 1) throw new Error('Token already expired')
                 let expireDate = moment().utc()
                 expireDate.add((expiresInSeconds > 5 ? expiresInSeconds - 5 : expiresInSeconds), 'seconds')
-
                 scopes.forEach(scope => {
                     currentTokenPerScope[scope] = {token: tokenData.token, expires: expireDate, queue: (scope in currentTokenPerScope && currentTokenPerScope[scope].queue ? currentTokenPerScope[scope].queue : [])}
                 })
-                if (typeof cb === 'function') cb(tokenData)
+                if (typeof cb === 'function') cb(dispatch, tokenData)
                 setInterval(() => {
                     dispatch(retrieveFetchAppToken(scopes))
                 }, Math.max(60000, (expiresInSeconds - 60) * 1000))
@@ -99,7 +101,7 @@ const fetchWithAppTokenMiddleware = (options = {}) => {
 
         let mergedHeaders = Object.assign({}, fetchOptions.headers ? fetchOptions.headers : {}, {[httpAppTokenHeader]: currentTokenPerScope[scope].token})
         let mergedFetchParameters = Object.assign({}, fetchOptions, {headers: mergedHeaders})
-        let fetchPromise = fetchFn(url, mergedFetchParameters)
+        let fetchPromise = fetchFn(url, mergedFetchParameters).then(response => response.json())
         afterFetchAction(fetchPromise, dispatch)
     }
 
